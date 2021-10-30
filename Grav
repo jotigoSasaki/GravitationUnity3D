@@ -1,0 +1,57 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Grav : MonoBehaviour
+{
+    const float G = 0.1f;
+    public List<Grav> otherObjs;
+    public float mass = 2;
+    public Vector3 V;
+    public Vector3 a;
+
+    private void Start()
+    {
+        otherObjs = new List<Grav> { };
+        GameObject[] Objects = GameObject.FindGameObjectsWithTag("Gravitation");
+        foreach (GameObject Object in Objects)
+        {
+            if(this.gameObject != Object)
+            {
+                Grav t = Object.GetComponent<Grav>();
+                otherObjs.Add(t);
+            }
+        }
+    }
+
+    void FixedUpdate()
+    {
+        a = AccelerationSet(otherObjs);
+        V = VelocitySet(V, a);
+        PositionSet(V);
+    }
+
+    Vector3 AccelerationSet(List<Grav> otherObjs)
+    {
+        Vector3 a = new Vector3(0, 0, 0);
+        foreach (Grav otherObj in otherObjs)
+        {
+            Vector3 Localdistant = otherObj.transform.position - this.gameObject.transform.position;
+            Vector3 Locala = G * otherObj.mass * Localdistant / (Localdistant.magnitude * Localdistant.magnitude * Localdistant.magnitude);
+            a += Locala;
+        }
+        return a;
+    }
+
+    Vector3 VelocitySet(Vector3 V,Vector3 a)
+    {
+        V += a;
+        return V;
+    }
+
+    void PositionSet( Vector3 V)
+    {
+        transform.position += V * Time.fixedDeltaTime;
+      
+    }
+}
